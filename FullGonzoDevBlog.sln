@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullGonzoDevBlog", "FullGonzoDevBlog\FullGonzoDevBlog.csproj", "{16026EB4-C33B-49C6-A9FA-36063DC3754D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Orleans", "Orleans", "{8218D5DF-7CAE-49E3-AE0C-156348D862E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullGonzoDevBlog.Silo", "FullGonzoDevBlog.Silo\FullGonzoDevBlog.Silo.csproj", "{43E67653-D9FA-4639-83CB-92F8511CA929}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullGonzoDevBlog.Abstractions", "FullGonzoDevBlog.Abstractions\FullGonzoDevBlog.Abstractions.csproj", "{A940AFAA-8A69-49A1-8E37-B601CDC31C2E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullGonzoDevBlog.Grains", "FullGonzoDevBlog.Grains\FullGonzoDevBlog.Grains.csproj", "{3E821721-2F0A-4967-83BA-C6491BBEA519}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16026EB4-C33B-49C6-A9FA-36063DC3754D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16026EB4-C33B-49C6-A9FA-36063DC3754D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16026EB4-C33B-49C6-A9FA-36063DC3754D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16026EB4-C33B-49C6-A9FA-36063DC3754D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43E67653-D9FA-4639-83CB-92F8511CA929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43E67653-D9FA-4639-83CB-92F8511CA929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43E67653-D9FA-4639-83CB-92F8511CA929}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43E67653-D9FA-4639-83CB-92F8511CA929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A940AFAA-8A69-49A1-8E37-B601CDC31C2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A940AFAA-8A69-49A1-8E37-B601CDC31C2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A940AFAA-8A69-49A1-8E37-B601CDC31C2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A940AFAA-8A69-49A1-8E37-B601CDC31C2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E821721-2F0A-4967-83BA-C6491BBEA519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E821721-2F0A-4967-83BA-C6491BBEA519}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E821721-2F0A-4967-83BA-C6491BBEA519}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E821721-2F0A-4967-83BA-C6491BBEA519}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{16026EB4-C33B-49C6-A9FA-36063DC3754D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{43E67653-D9FA-4639-83CB-92F8511CA929} = {8218D5DF-7CAE-49E3-AE0C-156348D862E3}
+		{A940AFAA-8A69-49A1-8E37-B601CDC31C2E} = {8218D5DF-7CAE-49E3-AE0C-156348D862E3}
+		{3E821721-2F0A-4967-83BA-C6491BBEA519} = {8218D5DF-7CAE-49E3-AE0C-156348D862E3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96E0A81B-1AD4-4C2A-8D53-58ACCEA903BC}
+	EndGlobalSection
+EndGlobal

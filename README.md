@@ -1,2 +1,2 @@
-# FullGonzoDevBlog
-This is a blog that I'm building from scratch. I'm using a .NET Blazor Web Front End with a Orleans Framework to handle the Data and Persistence. This is a work in progress as I'm using it to learn the .NET Orleans Framework for handling Service calls.
+# OrleansBlog
+This is a blog that I'm building from scratch. As you can see I'm just getting this started, and I invite you to join me in the Journey. I'm using a .NET Blazor Web Front End with a [Orleans Framework](https://learn.microsoft.com/en-us/dotnet/orleans/overview) backend to handle the Data and Persistence. This is a work in progress as I'm using it to learn the .NET Orleans Framework for handling Service calls.

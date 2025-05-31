@@ -1,7 +1,101 @@
-﻿@page "/"
+@page "/"
+@using OrleansBlog.Models
+@using OrleansBlog.Services
+@inject IPostService PostService
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Orleans Blog</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Orleans Blog</h1>
 
-Welcome to your new app.
+<p>Welcome to the Orleans Blog - A demonstration of Microsoft Orleans with Blazor.</p>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="mb-4">
+            <a href="/post/new" class="btn btn-primary">Create New Post</a>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+<h2>Recent Posts</h2>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (posts == null || posts.Count == 0)
+{
+    <div class="alert alert-info" role="alert">
+        No posts yet. Be the first to create one!
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var post in posts)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="/post/@post.Id">@post.Title</a>
+                        </h5>
+                        <p class="card-text">
+                            @(post.Content.Length > 150 ? post.Content.Substring(0, 150) + "..." : post.Content)
+                        </p>
+                        <div class="text-muted">
+                            <small>@post.Created.ToString("MMM dd, yyyy")</small>
+                            @if (post.Tags != null && post.Tags.Length > 0)
+                            {
+                                <span class="ms-2">
+                                    @foreach (var tag in post.Tags.Take(3))
+                                    {
+                                        <span class="badge bg-secondary me-1">@tag</span>
+                                    }
+                                    @if (post.Tags.Length > 3)
+                                    {
+                                        <span class="text-muted">...</span>
+                                    }
+                                </span>
+                            }
+                        </div>
+                        <a href="/post/@post.Id" class="btn btn-sm btn-outline-primary mt-2">Read More</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<OrleansBlog.Models.Post>? posts;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecentPosts();
+    }
+
+    private async Task LoadRecentPosts()
+    {
+        try
+        {
+            isLoading = true;
+            posts = await PostService.GetRecentPostsAsync(10);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading posts: {ex.Message}");
+            posts = new List<OrleansBlog.Models.Post>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -16,4 +16,8 @@
     <PackageReference Include="Microsoft.Orleans.Client" Version="9.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OrleansBlog.Abstractions\OrleansBlog.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>

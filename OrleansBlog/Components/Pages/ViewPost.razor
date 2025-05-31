@@ -1,0 +1,100 @@
+@page "/post/{id:long}"
+@using OrleansBlog.Models
+@using OrleansBlog.Services
+@inject IPostService PostService
+@rendermode InteractiveServer
+
+<PageTitle>@(post?.Title ?? "Loading...")</PageTitle>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (post == null)
+{
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Post not found</h4>
+        <p>The requested post could not be found.</p>
+        <hr>
+        <p class="mb-0"><a href="/" class="alert-link">Return to home</a></p>
+    </div>
+}
+else
+{
+    <article>
+        <h1>@post.Title</h1>
+        
+        <div class="text-muted mb-3">
+            <small>
+                Created on @post.Created.ToString("MMMM dd, yyyy 'at' h:mm tt")
+                @if (post.Updated.HasValue)
+                {
+                    <span> • Updated on @post.Updated.Value.ToString("MMMM dd, yyyy 'at' h:mm tt")</span>
+                }
+            </small>
+        </div>
+
+        @if (post.Tags != null && post.Tags.Length > 0)
+        {
+            <div class="mb-3">
+                @foreach (var tag in post.Tags)
+                {
+                    <span class="badge bg-secondary me-1">@tag</span>
+                }
+            </div>
+        }
+
+        <div class="mb-4">
+            @((MarkupString)FormatContent(post.Content))
+        </div>
+
+        <div class="mt-4">
+            <a href="/" class="btn btn-secondary">Back to Home</a>
+        </div>
+    </article>
+}
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+
+    private OrleansBlog.Models.Post? post;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPost();
+    }
+
+    private async Task LoadPost()
+    {
+        try
+        {
+            isLoading = true;
+            post = await PostService.GetPostAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            Console.WriteLine($"Error loading post: {ex.Message}");
+            post = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string FormatContent(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+            return string.Empty;
+
+        // Convert line breaks to HTML breaks
+        return content.Replace("\n", "<br />");
+    }
+}

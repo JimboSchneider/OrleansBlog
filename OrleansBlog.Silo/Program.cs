@@ -6,7 +6,7 @@ try
 	using IHost host = await StartSiloAsync();
 	
 	// Don't wait for input when running in background
-	if (Environment.GetEnvironmentVariable("ORLEANS_NO_WAIT") == "true")
+	if (bool.TryParse(Environment.GetEnvironmentVariable("ORLEANS_NO_WAIT"), out var noWait) && noWait)
 	{
 		await host.WaitForShutdownAsync();
 	}

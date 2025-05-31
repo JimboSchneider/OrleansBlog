@@ -33,8 +33,15 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Use SQLite for development if no connection string is provided
-if (string.IsNullOrEmpty(connectionString) || builder.Environment.IsDevelopment())
+// Use SQLite if no connection string is provided
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = "Data Source=orleans-blog.db";
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString));
+}
+// Override to use SQLite explicitly in development environments
+else if (builder.Environment.IsDevelopment())
 {
     connectionString = "Data Source=orleans-blog.db";
     builder.Services.AddDbContext<ApplicationDbContext>(options =>

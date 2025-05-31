@@ -4,10 +4,18 @@ using Microsoft.Extensions.Logging;
 try
 {
 	using IHost host = await StartSiloAsync();
-	Console.WriteLine("\n\n Press Enter to terminate...\n\n");
-	Console.ReadLine();
-
-	await host.StopAsync();
+	
+	// Don't wait for input when running in background
+	if (bool.TryParse(Environment.GetEnvironmentVariable("ORLEANS_NO_WAIT"), out var noWait) && noWait)
+	{
+		await host.WaitForShutdownAsync();
+	}
+	else
+	{
+		Console.WriteLine("\n\n Press Enter to terminate...\n\n");
+		Console.ReadLine();
+		await host.StopAsync();
+	}
 
 	return 0;
 }

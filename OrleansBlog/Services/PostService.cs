@@ -7,7 +7,7 @@ namespace OrleansBlog.Services
     {
         private readonly IClusterClient _clusterClient;
         private static long _nextPostId = 1;
-        private static readonly List<long> _postIds = new();
+        private static readonly ConcurrentQueue<long> _postIds = new();
 
         public PostService(IClusterClient clusterClient)
         {

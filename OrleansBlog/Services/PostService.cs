@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using OrleansBlog.Abstractions;
 using OrleansBlog.Models;
 
@@ -34,7 +35,7 @@ namespace OrleansBlog.Services
             orleansPost.Id = (int)postId;
             
             await grain.CreatePost(orleansPost);
-            _postIds.Add(postId);
+            _postIds.Enqueue(postId);
             
             return postId;
         }

@@ -27,7 +27,8 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
     - name: Ensure browsers are installed
-      run: pwsh OrleansBlog.E2E.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
+      shell: pwsh
+      run: OrleansBlog.E2E.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
     - name: Run tests
       run: dotnet test --no-build --configuration Release --verbosity normal
       

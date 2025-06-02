@@ -34,6 +34,8 @@ jobs:
       run: |
         cd ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
         ./playwright.ps1 install --with-deps
+    - name: Start Application Server
+      run: dotnet run --project ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --urls=http://localhost:5261
     - name: Run tests
       run: dotnet test --no-build --configuration Release --verbosity normal
       

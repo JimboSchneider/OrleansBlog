@@ -21,6 +21,7 @@ The solution follows a clean architecture pattern with the following projects:
 - **OrleansBlog.Grains** - Orleans grain implementations (business logic)
 - **OrleansBlog.Silo** - Orleans host/runtime
 - **OrleansBlog.Tests** - Comprehensive unit tests with Orleans TestingHost
+- **OrleansBlog.E2E.Tests** - End-to-end tests with Playwright for UI testing
 
 ## Prerequisites
 - .NET 9.0 SDK
@@ -41,7 +42,11 @@ dotnet build
 
 ### 3. Run tests (optional)
 ```bash
-dotnet test
+# Unit tests
+dotnet test OrleansBlog.Tests
+
+# End-to-end tests (requires application to be running)
+dotnet test OrleansBlog.E2E.Tests
 ```
 
 ### 4. Run the Orleans Silo (required first)
@@ -114,6 +119,7 @@ sqlite3 orleans-blog.db "SELECT * FROM AspNetUsers;"
 - ✅ Recent posts display on home page
 - ✅ Tag support with comma-separated input
 - ✅ Comprehensive unit testing with Orleans TestingHost
+- ✅ End-to-end testing with Playwright for UI scenarios
 - ✅ Navigation integration for authenticated users
 
 ## Planned Features

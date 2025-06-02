@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansBlog.Silo", "Orleans
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansBlog.Tests", "OrleansBlog.Tests\OrleansBlog.Tests.csproj", "{66A8A9E7-F2EA-4903-B242-ED92844D8975}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansBlog.E2E.Tests", "OrleansBlog.E2E.Tests\OrleansBlog.E2E.Tests.csproj", "{7206E55B-DC8A-443F-999A-5EA58478A550}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{66A8A9E7-F2EA-4903-B242-ED92844D8975}.Release|x64.Build.0 = Release|Any CPU
 		{66A8A9E7-F2EA-4903-B242-ED92844D8975}.Release|x86.ActiveCfg = Release|Any CPU
 		{66A8A9E7-F2EA-4903-B242-ED92844D8975}.Release|x86.Build.0 = Release|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Debug|x64.Build.0 = Debug|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Debug|x86.Build.0 = Debug|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Release|x64.ActiveCfg = Release|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Release|x64.Build.0 = Release|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Release|x86.ActiveCfg = Release|Any CPU
+		{7206E55B-DC8A-443F-999A-5EA58478A550}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

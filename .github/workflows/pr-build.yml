@@ -26,6 +26,9 @@ jobs:
       run: dotnet restore
     - name: Build all projects
       run: dotnet build OrleansBlog.sln --no-restore --configuration Release
+    - name: Build E2E Tests
+      run: |
+        dotnet build OrleansBlog.E2E.Tests --configuration Debug --framework net9.0 --output ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
     - name: Ensure browsers are installed
       shell: pwsh
       run: |

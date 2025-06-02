@@ -35,7 +35,7 @@ jobs:
       run: dotnet build --no-restore --configuration Release
     
     - name: Ensure browsers are installed
-      run: pwsh bin/Debug/net8.0/playwright.ps1 install --with-deps
+      run: pwsh bin/Debug/net9.0/playwright.ps1 install --with-deps
     
     - name: Run tests
       run: dotnet test --no-build --configuration Release --verbosity normal

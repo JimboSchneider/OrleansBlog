@@ -24,8 +24,8 @@ jobs:
           ${{ runner.os }}-nuget-
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
+    - name: Build all projects
+      run: dotnet build OrleansBlog.sln --no-restore --configuration Release
     - name: Ensure browsers are installed
       shell: pwsh
       run: |

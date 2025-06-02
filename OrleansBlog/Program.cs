@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OrleansBlog.Components;
 using OrleansBlog.Components.Account;
 using OrleansBlog.Data;
+using OrleansBlog.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,152 @@
+@page "/post/new"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using OrleansBlog.Models
+@using OrleansBlog.Services
+@using System.ComponentModel.DataAnnotations
+@inject IPostService PostService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Create New Post</PageTitle>
+
+<h1>Create New Post</h1>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @successMessage
+    </div>
+}
+
+<EditForm Model="@postModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger" />
+
+    <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="postModel.Title" />
+        <ValidationMessage For="() => postModel.Title" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label for="content" class="form-label">Content</label>
+        <InputTextArea id="content" class="form-control" @bind-Value="postModel.Content" rows="10" />
+        <ValidationMessage For="() => postModel.Content" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label for="tags" class="form-label">Tags (comma-separated)</label>
+        <InputText id="tags" class="form-control" @bind-Value="tagsInput" placeholder="tag1, tag2, tag3" />
+        <small class="form-text text-muted">Enter tags separated by commas</small>
+    </div>
+
+    <div class="mb-3">
+        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+            @if (isSubmitting)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span>Creating...</span>
+            }
+            else
+            {
+                <span>Create Post</span>
+            }
+        </button>
+        <a href="/" class="btn btn-secondary ms-2">Cancel</a>
+    </div>
+</EditForm>
+
+@code {
+    private PostFormModel postModel = new();
+    private string tagsInput = string.Empty;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private bool isSubmitting = false;
+
+    private class PostFormModel
+    {
+        [Required(ErrorMessage = "Title is required")]
+        [StringLength(200, ErrorMessage = "Title must be less than 200 characters")]
+        public string Title { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Content is required")]
+        [StringLength(10000, ErrorMessage = "Content must be less than 10000 characters")]
+        public string Content { get; set; } = string.Empty;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        isSubmitting = true;
+
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user?.Identity?.IsAuthenticated != true)
+            {
+                errorMessage = "You must be logged in to create a post.";
+                return;
+            }
+
+            var userId = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                errorMessage = "Unable to determine user identity.";
+                return;
+            }
+
+            var post = new OrleansBlog.Models.Post
+            {
+                Title = postModel.Title,
+                Content = postModel.Content,
+                AuthorId = userId,
+                Tags = ParseTags(tagsInput)
+            };
+
+            var postId = await PostService.CreatePostAsync(post);
+            successMessage = "Post created successfully!";
+            
+            // Clear the form
+            postModel = new PostFormModel();
+            tagsInput = string.Empty;
+            
+            // Redirect to the post view page after a short delay
+            await Task.Delay(1500);
+            Navigation.NavigateTo($"/post/{postId}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred while creating the post: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private string[] ParseTags(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return Array.Empty<string>();
+
+        return input
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(tag => tag.Trim())
+            .Where(tag => !string.IsNullOrEmpty(tag))
+            .Distinct()
+            .ToArray();
+    }
+}

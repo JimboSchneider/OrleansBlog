@@ -3,23 +3,38 @@ using OrleansBlog.Abstractions.Models;
 
 namespace OrleansBlog.Grains
 {
-	public class PostGrain : IPostGrain
+	public class PostGrain : Grain, IPostGrain
 	{
-		private readonly IGrainFactory _grainFactory;
-		private Post _post = new();
+		private Post? _post;
 
-		public PostGrain(IGrainFactory grainFactory)
+		public Task<Post?> GetPost()
 		{
-			_grainFactory = grainFactory;
+			return Task.FromResult(_post);
 		}
 
-		public async Task<Post> GetPost()
+		public Task CreatePost(Post post)
 		{
-			return await Task.FromResult(_post);
+			if (_post != null && _post.Id > 0)
+			{
+				throw new InvalidOperationException("Post already exists");
+			}
+
+			post.Id = (int)this.GetPrimaryKeyLong();
+			post.Created = DateTime.UtcNow;
+			_post = post;
+			return Task.CompletedTask;
 		}
 
 		public Task UpdatePost(Post post)
 		{
+			if (_post == null || _post.Id == 0)
+			{
+				throw new InvalidOperationException("Post does not exist");
+			}
+
+			post.Id = _post.Id;
+			post.Created = _post.Created;
+			post.Updated = DateTime.UtcNow;
 			_post = post;
 			return Task.CompletedTask;
 		}

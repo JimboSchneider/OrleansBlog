@@ -3,7 +3,7 @@
 A blog application built with .NET Blazor Server and Microsoft Orleans Framework. This project demonstrates the use of Orleans' grain-based architecture for scalable, distributed state management in a real-world blog application.
 
 ## Current Status
-**Work in Progress** - Basic infrastructure is in place and functional. Blog features are not yet implemented.
+**Functional Blog Platform** - Core blog functionality is implemented with Orleans grains, including post creation, viewing, and comprehensive testing.
 
 ## Technology Stack
 - **.NET 9.0** - Latest .NET version
@@ -20,6 +20,8 @@ The solution follows a clean architecture pattern with the following projects:
 - **OrleansBlog.Abstractions** - Grain interfaces and domain models
 - **OrleansBlog.Grains** - Orleans grain implementations (business logic)
 - **OrleansBlog.Silo** - Orleans host/runtime
+- **OrleansBlog.Tests** - Comprehensive unit tests with Orleans TestingHost
+- **OrleansBlog.E2E.Tests** - End-to-end tests with Playwright for UI testing
 
 ## Prerequisites
 - .NET 9.0 SDK
@@ -38,14 +40,23 @@ cd OrleansBlog
 dotnet build
 ```
 
-### 3. Run the Orleans Silo (required first)
+### 3. Run tests (optional)
+```bash
+# Unit tests
+dotnet test OrleansBlog.Tests
+
+# End-to-end tests (requires application to be running)
+dotnet test OrleansBlog.E2E.Tests
+```
+
+### 4. Run the Orleans Silo (required first)
 In one terminal:
 ```bash
 cd OrleansBlog.Silo
 dotnet run
 ```
 
-### 4. Run the Blazor Web Application
+### 5. Run the Blazor Web Application
 In another terminal:
 ```bash
 cd OrleansBlog
@@ -55,6 +66,24 @@ dotnet run
 The application will be available at:
 - HTTP: http://localhost:5261
 - HTTPS: https://localhost:7233
+
+## Using the Blog
+
+### Creating Posts
+1. Register a new account or log in with an existing account
+2. Navigate to the "New Post" link in the navigation menu (only visible when authenticated)
+3. Fill out the post form with title, content, and optional tags (comma-separated)
+4. Submit to create the post using Orleans grains for distributed state management
+
+### Viewing Posts
+- Recent posts are displayed on the home page
+- Click any post title to view the full post content
+- Posts show creation date, tags, and formatted content
+
+### Authentication
+- User registration and login powered by ASP.NET Core Identity
+- Only authenticated users can create posts
+- User data stored in SQLite database
 
 ## Development Notes
 
@@ -81,23 +110,31 @@ sqlite3 orleans-blog.db "SELECT * FROM AspNetUsers;"
 
 ## Current Features
 - ✅ Orleans silo and client configuration
-- ✅ ASP.NET Core Identity integration
+- ✅ ASP.NET Core Identity integration with authentication
 - ✅ SQLite database with Entity Framework migrations
-- ✅ Basic Blazor Server setup
+- ✅ Blog post creation with form validation and error handling
+- ✅ Post viewing with formatted content display
+- ✅ PostGrain implementation with Create, Update, and Get operations
+- ✅ PostService for business logic and grain interaction
+- ✅ Recent posts display on home page
+- ✅ Tag support with comma-separated input
+- ✅ Comprehensive unit testing with Orleans TestingHost
+- ✅ End-to-end testing with Playwright for UI scenarios
+- ✅ Navigation integration for authenticated users
 
 ## Planned Features
-- [ ] Blog post creation and editing (using Orleans grains)
 - [ ] Comments system
-- [ ] Tags and categories
-- [ ] Search functionality
+- [ ] Post editing functionality
+- [ ] Advanced search and filtering
 - [ ] Admin dashboard
-- [ ] Orleans grain persistence (MongoDB planned)
+- [ ] Orleans grain persistence with SQLite storage
 - [ ] Production deployment configuration
+- [ ] Post categories and advanced tagging
 
 ## Known Issues
-- Orleans grains currently use in-memory storage only
-- No actual blog functionality implemented yet
+- Orleans grains currently use in-memory storage (persistence planned)
 - Localhost clustering only (not production-ready)
+- Limited post formatting options
 
 ## Contributing
 This is a learning project for exploring Orleans Framework. Contributions and suggestions are welcome!

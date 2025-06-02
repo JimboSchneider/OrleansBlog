@@ -1,25 +1,20 @@
 name: PR Build Validation
-
 on:
   pull_request:
     branches: [ main ]
     types: [ opened, synchronize, reopened ]
-
 jobs:
   build:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    
     steps:
     - uses: actions/checkout@v4
-    
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
-    
     - name: Cache NuGet packages
       uses: actions/cache@v3
       with:
@@ -27,15 +22,12 @@ jobs:
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.config', 'global.json') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
-    
     - name: Restore dependencies
       run: dotnet restore
-    
     - name: Build
       run: dotnet build --no-restore --configuration Release
-    
     - name: Ensure browsers are installed
-      run: pwsh bin/Debug/net9.0/playwright.ps1 install --with-deps
-    
+      run: pwsh OrleansBlog.E2E.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
     - name: Run tests
       run: dotnet test --no-build --configuration Release --verbosity normal
+      

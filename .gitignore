@@ -364,3 +364,7 @@ FodyWeavers.xsd
 .idea/.idea.OrleansBlog/.idea/discord.xml
 
 .DS_Store
+
+OrleansBlog/orleans-blog.db-shm
+
+OrleansBlog/orleans-blog.db-wal

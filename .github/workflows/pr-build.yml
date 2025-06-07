@@ -18,7 +18,7 @@ jobs:
     - name: Cache NuGet packages
       uses: actions/cache@v3
       with:
-        path: ~/.nuget/packages
+        path: ${{ runner.os == 'Windows' && 'C:\\Users\\runneradmin\\.nuget\\packages' || '~/.nuget/packages' }}
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.config', 'global.json') }}
         restore-keys: |
           ${{ runner.os }}-nuget-

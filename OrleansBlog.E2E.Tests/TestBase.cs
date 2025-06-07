@@ -27,6 +27,7 @@ public abstract class TestBase : PageTest
     {
         // Optional: Clear any application state if needed
         // This could include logging out users, cleaning up test data, etc.
+        await Task.Delay(0);
     }
     
     protected async Task WaitForApplicationToLoad()

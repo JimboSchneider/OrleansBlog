@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System.Net;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans.Configuration;
 using Microsoft.Data.Sqlite;
@@ -35,6 +36,12 @@ static async Task<IHost> StartSiloAsync()
 		{
 			silo
 				.UseLocalhostClustering()
+				.Configure<EndpointOptions>(options => 
+				{
+					options.AdvertisedIPAddress = IPAddress.Loopback;
+					options.GatewayListeningEndpoint = new IPEndPoint(IPAddress.Loopback, 30000);
+					options.SiloListeningEndpoint = new IPEndPoint(IPAddress.Loopback, 11111);
+				})
 				.ConfigureLogging(logging => logging.AddConsole());
 		});
 

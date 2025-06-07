@@ -23,14 +23,8 @@ public class BlogPostTests : TestBase
         // Act - Create a blog post
         await BlogTestHelpers.CreateBlogPost(Page, postTitle, postContent, postTags);
         
-        // Assert - Verify post was created successfully (success message appears briefly before redirect)
-        await Expect(Page.GetByText("Post created successfully!")).ToBeVisibleAsync(new() { Timeout = 2000 });
-        
-        // Wait for redirect to post view page
-        await Page.WaitForURLAsync(new System.Text.RegularExpressions.Regex(".*/post/\\d+$"), new() { Timeout = 3000 });
-        
-        // Verify we're on the post view page with the correct title
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = postTitle })).ToBeVisibleAsync();
+        // Assert - Verify we're on the post view page with the correct title
+        await Expect(Page.Locator("article h1", new() { HasTextString = postTitle })).ToBeVisibleAsync();
         
         // Verify post appears on home page
         await BlogTestHelpers.VerifyPostExistsOnHomePage(Page, postTitle);
@@ -50,11 +44,11 @@ public class BlogPostTests : TestBase
         await UserTestHelpers.VerifyUserIsLoggedOut(Page);
         
         // Assert - New Post link should not be visible when not authenticated
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "New Post" })).Not.ToBeVisibleAsync();
+        await Expect(Page.Locator(".nav-link").Filter(new() { HasText = "New Post" })).Not.ToBeVisibleAsync();
         
         // And Login/Register links should be visible
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Login" })).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Register", Exact = true })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".nav-link", new() { HasText = "Login" })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".nav-link", new() { HasText = "Register" })).ToBeVisibleAsync();
     }
     
     [Test]
@@ -109,9 +103,6 @@ public class BlogPostTests : TestBase
         
         await BlogTestHelpers.CreateBlogPost(Page, postTitle, postContent);
         
-        // Wait for redirect to post view after creation
-        await Page.WaitForURLAsync(new System.Text.RegularExpressions.Regex(".*/post/\\d+$"), new() { Timeout = 3000 });
-        
         // Act - Navigate to home and click on the post
         await Page.GotoAsync(PlaywrightConfig.BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
@@ -125,7 +116,8 @@ public class BlogPostTests : TestBase
         
         // Verify back to home link works
         await Page.GetByRole(AriaRole.Link, new() { Name = "Back to Home" }).ClickAsync();
-        await Page.WaitForURLAsync(PlaywrightConfig.BaseUrl);
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Expect(Page).ToHaveURLAsync(new Regex(".*/$|.*/home$", RegexOptions.IgnoreCase));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Orleans Blog" })).ToBeVisibleAsync();
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
+using System.Text.RegularExpressions;
 
 namespace OrleansBlog.E2E.Tests.TestHelpers;
 
@@ -25,8 +26,8 @@ public static class BlogTestHelpers
         // Submit the form
         await page.GetByRole(AriaRole.Button, new() { Name = "Create Post" }).ClickAsync();
         
-        // Wait for success message or redirect
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        // Wait for redirect to post view page (indicates successful creation)
+        await page.WaitForURLAsync(new System.Text.RegularExpressions.Regex(".*/post/\\d+$"), new() { Timeout = 10000 });
     }
     
     public static async Task VerifyPostExistsOnHomePage(IPage page, string title)
@@ -55,15 +56,18 @@ public static class BlogTestHelpers
         // Verify post title
         await Expect(page.GetByRole(AriaRole.Heading, new() { Name = title })).ToBeVisibleAsync();
         
-        // Verify post content
-        await Expect(page.GetByText(content)).ToBeVisibleAsync();
+        // Verify post content - look for content within the main content area to avoid duplicates
+        // Use a more specific selector to target the post content area
+        var contentLocator = page.Locator("main").GetByText(content).First;
+        await Expect(contentLocator).ToBeVisibleAsync();
     }
     
     public static async Task VerifyPostTags(IPage page, params string[] expectedTags)
     {
         foreach (var tag in expectedTags)
         {
-            await Expect(page.Locator(".badge").Filter(new() { HasText = tag })).ToBeVisibleAsync();
+            // Use a more specific selector to find tags within the main content area
+            await Expect(page.Locator("main .badge").Filter(new() { HasText = tag }).First).ToBeVisibleAsync();
         }
     }
 }

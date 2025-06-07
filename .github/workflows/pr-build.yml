@@ -40,7 +40,7 @@ jobs:
       shell: bash
     - name: Start Blazor Server
       run: |
-        dotnet run --project ./OrleansBlog/OrleansBlog.csproj --urls=https://localhost:5261 &
+        dotnet run --project ./OrleansBlog/OrleansBlog.csproj
       shell: bash
     - name: Wait for services to start
       run: |

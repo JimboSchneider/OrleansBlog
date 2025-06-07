@@ -24,7 +24,7 @@ public class BlogPostTests : TestBase
         await BlogTestHelpers.CreateBlogPost(Page, postTitle, postContent, postTags);
         
         // Assert - Verify we're on the post view page with the correct title
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = postTitle })).ToBeVisibleAsync();
+        await Expect(Page.Locator("article h1", new() { HasTextString = postTitle })).ToBeVisibleAsync();
         
         // Verify post appears on home page
         await BlogTestHelpers.VerifyPostExistsOnHomePage(Page, postTitle);
@@ -44,11 +44,11 @@ public class BlogPostTests : TestBase
         await UserTestHelpers.VerifyUserIsLoggedOut(Page);
         
         // Assert - New Post link should not be visible when not authenticated
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "New Post" })).Not.ToBeVisibleAsync();
+        await Expect(Page.Locator(".nav-link").Filter(new() { HasText = "New Post" })).Not.ToBeVisibleAsync();
         
         // And Login/Register links should be visible
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Login" })).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Register", Exact = true })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".nav-link", new() { HasText = "Login" })).ToBeVisibleAsync();
+        await Expect(Page.Locator(".nav-link", new() { HasText = "Register" })).ToBeVisibleAsync();
     }
     
     [Test]

@@ -91,14 +91,13 @@ public static class UserTestHelpers
         
         // Primary indicators of successful login
         // Verify "New Post" link is visible (only for authenticated users)
-        await Expect(page.GetByRole(AriaRole.Link, new() { Name = "New Post" })).ToBeVisibleAsync(new() { Timeout = 15000 });
-        
+        await Expect(page.Locator("a.nav-link", new() { HasTextString = "New Post" })).ToBeVisibleAsync();
         // Verify Logout button is visible
-        await Expect(page.GetByRole(AriaRole.Button, new() { Name = "Logout" })).ToBeVisibleAsync();
+        await Expect(page.Locator("button.nav-link", new() { HasTextString = "Logout" })).ToBeVisibleAsync();
         
         // Verify Login/Register links are no longer visible
-        await Expect(page.GetByRole(AriaRole.Link, new() { Name = "Login" })).Not.ToBeVisibleAsync();
-        await Expect(page.GetByRole(AriaRole.Link, new() { Name = "Register", Exact = true })).Not.ToBeVisibleAsync();
+        await Expect(page.Locator("a.nav-link", new() { HasTextString = "Login" })).Not.ToBeVisibleAsync();
+        await Expect(page.Locator("a.nav-link", new() { HasTextString = "Register" })).Not.ToBeVisibleAsync();
     }
     
     public static async Task VerifyUserIsLoggedOut(IPage page)

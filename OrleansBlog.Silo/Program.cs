@@ -36,8 +36,12 @@ static async Task<IHost> StartSiloAsync()
 		{
 			silo
 				.UseLocalhostClustering()
-				.Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-				.ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
+				.Configure<EndpointOptions>(options => 
+				{
+					options.AdvertisedIPAddress = IPAddress.Loopback;
+					options.GatewayListeningEndpoint = new IPEndPoint(IPAddress.Loopback, 30000);
+					options.SiloListeningEndpoint = new IPEndPoint(IPAddress.Loopback, 11111);
+				})
 				.ConfigureLogging(logging => logging.AddConsole());
 		});
 

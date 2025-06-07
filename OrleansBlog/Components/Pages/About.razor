@@ -1,0 +1,70 @@
+@page "/about"
+@using System.Reflection
+@using System.Runtime.InteropServices
+
+<PageTitle>About - Orleans Blog</PageTitle>
+
+<h1>About Orleans Blog</h1>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h3 class="card-title">Version Information</h3>
+        <dl class="row">
+            <dt class="col-sm-3">Application Version</dt>
+            <dd class="col-sm-9">@_version</dd>
+            
+            <dt class="col-sm-3">Assembly Version</dt>
+            <dd class="col-sm-9">@_assemblyVersion</dd>
+            
+            <dt class="col-sm-3">.NET Version</dt>
+            <dd class="col-sm-9">@RuntimeInformation.FrameworkDescription</dd>
+            
+            <dt class="col-sm-3">Operating System</dt>
+            <dd class="col-sm-9">@RuntimeInformation.OSDescription</dd>
+            
+            <dt class="col-sm-3">Architecture</dt>
+            <dd class="col-sm-9">@RuntimeInformation.OSArchitecture</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h3 class="card-title">Technology Stack</h3>
+        <ul>
+            <li><strong>Blazor Server</strong> - Interactive web UI with server-side rendering</li>
+            <li><strong>Microsoft Orleans 9.1.2</strong> - Actor-based distributed computing framework</li>
+            <li><strong>Entity Framework Core 9.0</strong> - ORM for data access</li>
+            <li><strong>ASP.NET Core Identity</strong> - Authentication and authorization</li>
+            <li><strong>SQLite</strong> - Database for development</li>
+        </ul>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h3 class="card-title">About the Project</h3>
+        <p>
+            Orleans Blog is a demonstration blog application built with .NET Blazor Server and Microsoft Orleans Framework. 
+            This project showcases the use of Orleans' grain-based architecture for scalable, distributed state management 
+            in a real-world blog application.
+        </p>
+        <p>
+            The application uses Orleans grains to manage blog posts, providing a scalable foundation for future enhancements
+            such as comments, categories, and advanced search functionality.
+        </p>
+    </div>
+</div>
+
+@code {
+    private string _version = "";
+    private string _assemblyVersion = "";
+
+    protected override void OnInitialized()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version;
+        _version = $"{version?.Major}.{version?.Minor}.{version?.Build}";
+        _assemblyVersion = version?.ToString() ?? "Unknown";
+    }
+}

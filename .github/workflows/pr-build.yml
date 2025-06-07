@@ -34,8 +34,19 @@ jobs:
       run: |
         cd ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
         ./playwright.ps1 install --with-deps
-    - name: Start Application Server
-      run: dotnet run --project ./OrleansBlog/OrleansBlog.csproj --urls=http://localhost:5261
-    - name: Run tests
-      run: dotnet test --no-build --configuration Release --verbosity normal
+    - name: Start Orleans Silo
+      run: |
+        dotnet run --project ./OrleansBlog.Silo/OrleansBlog.Silo.csproj &
+      shell: bash
+    - name: Start Blazor Server
+      run: |
+        dotnet run --project ./OrleansBlog/OrleansBlog.csproj --urls=https://localhost:7233 &
+      shell: bash
+    - name: Wait for services to start
+      run: |
+        echo "Waiting for services to start..."
+        sleep 30
+      shell: bash
+    - name: Run E2E tests
+      run: dotnet test ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --configuration Release --verbosity normal
       

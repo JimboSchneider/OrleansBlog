@@ -12,7 +12,7 @@ builder.Host
 	.UseOrleansClient(client =>
 	{
 		client
-			.UseLocalhostClustering();
+			.UseLocalhostClustering(gatewayPort: 30000);
 	})
 	.ConfigureLogging(logging => logging.AddConsole());
 

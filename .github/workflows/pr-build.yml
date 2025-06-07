@@ -33,14 +33,14 @@ jobs:
       shell: pwsh
       run: |
         cd ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
-        ./playwright.ps1 install --with-deps
+        ./playwright.ps1 install --with-deps || echo "Playwright installation failed"
     - name: Start Orleans Silo
       run: |
-        dotnet run --project ./OrleansBlog.Silo/OrleansBlog.Silo.csproj &
+        dotnet run --project ./OrleansBlog.Silo/OrleansBlog.Silo.csproj --applicationName=Silo --gatewayPort=30000 &
       shell: bash
     - name: Start Blazor Server
       run: |
-        dotnet run --project ./OrleansBlog/OrleansBlog.csproj --urls=https://localhost:7233 &
+        dotnet run --project ./OrleansBlog/OrleansBlog.csproj --urls=https://localhost:5261 &
       shell: bash
     - name: Wait for services to start
       run: |

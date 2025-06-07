@@ -1,0 +1,52 @@
+name: PR Build Validation
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ${{ runner.os == 'Windows' && 'C:\\Users\\runneradmin\\.nuget\\packages' || '~/.nuget/packages' }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.config', 'global.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build all projects
+      run: dotnet build OrleansBlog.sln --no-restore --configuration Release
+    - name: Build E2E Tests
+      run: |
+        dotnet build OrleansBlog.E2E.Tests --configuration Debug --framework net9.0 --output ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
+    - name: Ensure browsers are installed
+      shell: pwsh
+      run: |
+        cd ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
+        ./playwright.ps1 install --with-deps || echo "Playwright installation failed"
+    - name: Start Orleans Silo
+      run: |
+        dotnet run --project ./OrleansBlog.Silo/OrleansBlog.Silo.csproj --applicationName=Silo --gatewayPort=30000 &
+      shell: bash
+    - name: Start Blazor Server
+      run: |
+        dotnet run --project ./OrleansBlog/OrleansBlog.csproj &
+      shell: bash
+    - name: Wait for services to start
+      run: |
+        echo "Waiting for services to start..."
+        sleep 30
+      shell: bash
+    - name: Run E2E tests
+      run: dotnet test ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --configuration Release --verbosity normal
+      

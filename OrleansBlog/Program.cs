@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Orleans.Configuration;
 using OrleansBlog.Components;
 using OrleansBlog.Components.Account;
 using OrleansBlog.Data;
@@ -8,11 +9,20 @@ using OrleansBlog.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add startup delay in development to ensure Silo is ready
+if (builder.Environment.IsDevelopment() && 
+    Environment.GetEnvironmentVariable("ORLEANS_STARTUP_DELAY") is { } delayStr && 
+    int.TryParse(delayStr, out var delaySeconds))
+{
+    Console.WriteLine($"Waiting {delaySeconds} seconds for Orleans Silo to start...");
+    await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+}
+
 builder.Host
 	.UseOrleansClient(client =>
 	{
 		client
-			.UseLocalhostClustering();
+			.UseLocalhostClustering(gatewayPort: 30000);
 	})
 	.ConfigureLogging(logging => logging.AddConsole());
 

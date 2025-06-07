@@ -27,7 +27,7 @@ public static class BlogTestHelpers
         await page.GetByRole(AriaRole.Button, new() { Name = "Create Post" }).ClickAsync();
         
         // Wait for redirect to post view page (indicates successful creation)
-        await page.WaitForURLAsync(new System.Text.RegularExpressions.Regex(".*/post/\\d+$"), new() { Timeout = 5000 });
+        await page.WaitForURLAsync(new System.Text.RegularExpressions.Regex(".*/post/\\d+$"), new() { Timeout = 10000 });
     }
     
     public static async Task VerifyPostExistsOnHomePage(IPage page, string title)

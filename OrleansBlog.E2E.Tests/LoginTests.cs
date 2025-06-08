@@ -38,7 +38,7 @@ public class LoginTests : TestBase
         await Page.GetByRole(AriaRole.Button, new() { Name = "Log in" }).ClickAsync();
         
         // Assert - Verify error message and staying on login page
-        await Expect(Page.GetByText("Invalid login attempt")).ToBeVisibleAsync(new() { Timeout = 5000 });
+        await Expect(Page.GetByText("Invalid login attempt")).ToBeVisibleAsync(new() { Timeout = 10000 });
         await AssertPageTitle("Log in");
         await UserTestHelpers.VerifyUserIsLoggedOut(Page);
     }

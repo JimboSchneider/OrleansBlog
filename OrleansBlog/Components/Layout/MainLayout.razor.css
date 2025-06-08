@@ -70,10 +70,16 @@ main {
         width: 0;
     }
 
-    .top-row, article {
+    .top-row, article, footer {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
     }
+}
+
+footer {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    font-size: 0.875rem;
 }
 
 #blazor-error-ui {

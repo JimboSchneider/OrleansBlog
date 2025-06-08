@@ -368,3 +368,5 @@ FodyWeavers.xsd
 OrleansBlog/orleans-blog.db-shm
 
 OrleansBlog/orleans-blog.db-wal
+
+OrleansBlog/orleans-blog.db

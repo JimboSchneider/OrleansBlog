@@ -45,7 +45,8 @@ dotnet build
 # Unit tests
 dotnet test OrleansBlog.Tests
 
-# End-to-end tests (requires application to be running)
+# End-to-end tests (requires Silo and Blazor app to be running)
+# First start the Silo and Blazor app (see steps 4 & 5), then:
 dotnet test OrleansBlog.E2E.Tests
 ```
 
@@ -108,6 +109,32 @@ sqlite3 orleans-blog.db ".tables"
 sqlite3 orleans-blog.db "SELECT * FROM AspNetUsers;"
 ```
 
+## CI/CD and Testing
+
+### GitHub Actions Workflow
+The project includes automated build validation for pull requests targeting the `main` branch:
+
+- **Multi-OS Testing**: Runs on both Ubuntu and Windows to ensure cross-platform compatibility
+- **Full Build Process**: Builds all projects in Release configuration
+- **E2E Test Automation**: Automatically starts Orleans Silo and Blazor Server, then runs Playwright tests
+- **NuGet Package Caching**: Speeds up builds by caching dependencies
+
+### Running E2E Tests Locally
+E2E tests use Playwright for browser automation and require both the Orleans Silo and Blazor app to be running:
+
+```bash
+# 1. Start Orleans Silo (in terminal 1)
+cd OrleansBlog.Silo
+dotnet run
+
+# 2. Start Blazor app (in terminal 2)
+cd OrleansBlog
+dotnet run
+
+# 3. Run E2E tests (in terminal 3)
+dotnet test OrleansBlog.E2E.Tests
+```
+
 ## Current Features
 - ✅ Orleans silo and client configuration
 - ✅ ASP.NET Core Identity integration with authentication
@@ -121,6 +148,7 @@ sqlite3 orleans-blog.db "SELECT * FROM AspNetUsers;"
 - ✅ Comprehensive unit testing with Orleans TestingHost
 - ✅ End-to-end testing with Playwright for UI scenarios
 - ✅ Navigation integration for authenticated users
+- ✅ CI/CD pipeline with GitHub Actions for PR validation
 
 ## Planned Features
 - [ ] Comments system

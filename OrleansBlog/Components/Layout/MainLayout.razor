@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using System.Reflection
 
 <div class="page">
     <div class="sidebar">
@@ -7,12 +8,20 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <a href="/about">About</a>
         </div>
 
         <article class="content px-4">
             @Body
         </article>
+        
+        <footer class="content px-4 text-muted">
+            <hr />
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Orleans Blog v@_version</span>
+                <span>&copy; @DateTime.Now.Year Orleans Blog</span>
+            </div>
+        </footer>
     </main>
 </div>
 
@@ -21,3 +30,14 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private string _version = "";
+
+    protected override void OnInitialized()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version;
+        _version = $"{version?.Major}.{version?.Minor}.{version?.Build}";
+    }
+}

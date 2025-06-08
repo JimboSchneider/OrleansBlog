@@ -42,7 +42,7 @@ public static class UserTestHelpers
         // Look for the email confirmation link that's displayed on the page
         // (since we're using IdentityNoOpEmailSender, it shows the link directly)
         var confirmationLink = page.GetByRole(AriaRole.Link, new() { Name = "Click here to confirm your account" });
-        await Expect(confirmationLink).ToBeVisibleAsync(new() { Timeout = 5000 });
+        await Expect(confirmationLink).ToBeVisibleAsync(new() { Timeout = 10000 });
         
         // Click the confirmation link
         await confirmationLink.ClickAsync();

@@ -105,7 +105,10 @@ public class PostServiceTests
             Id = 5,
             Title = "Updated Post",
             Content = "Updated Content",
-            AuthorId = "user789"
+            AuthorId = "user789",
+            Tags =
+            [
+            ]
         };
 
         mockGrain.Setup(g => g.UpdatePost(It.IsAny<OrleansBlog.Abstractions.Models.Post>()))
@@ -132,8 +135,24 @@ public class PostServiceTests
         var newerDate = DateTime.UtcNow.AddDays(-1);
 
         // Create posts
-        var post1 = new Post { Title = "Post 1", Content = "Content 1", AuthorId = "user1" };
-        var post2 = new Post { Title = "Post 2", Content = "Content 2", AuthorId = "user2" };
+        var post1 = new Post
+        {
+            Title = "Post 1",
+            Content = "Content 1",
+            AuthorId = "user1",
+            Tags =
+            [
+            ]
+        };
+        var post2 = new Post
+        {
+            Title = "Post 2",
+            Content = "Content 2",
+            AuthorId = "user2",
+            Tags =
+            [
+            ]
+        };
 
         // Setup grains for each post
         var mockGrain1 = new Mock<IPostGrain>();

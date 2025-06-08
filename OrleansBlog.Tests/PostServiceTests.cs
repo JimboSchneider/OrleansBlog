@@ -30,7 +30,7 @@ public class PostServiceTests
             Content = "Test Content",
             AuthorId = "user123",
             Created = DateTime.UtcNow,
-            Tags = new[] { "test" }
+            Tags = ["test"]
         };
 
         mockGrain.Setup(g => g.GetPost()).ReturnsAsync(orleansPost);
@@ -53,7 +53,7 @@ public class PostServiceTests
         // Arrange
         var postId = 999L;
         var mockGrain = new Mock<IPostGrain>();
-        mockGrain.Setup(g => g.GetPost()).ReturnsAsync((OrleansBlog.Abstractions.Models.Post)null);
+        mockGrain.Setup(g => g.GetPost()).ReturnsAsync((OrleansBlog.Abstractions.Models.Post)null!);
         _mockClusterClient.Setup(c => c.GetGrain<IPostGrain>(postId, null))
             .Returns(mockGrain.Object);
 
@@ -74,7 +74,7 @@ public class PostServiceTests
             Title = "New Post",
             Content = "New Content",
             AuthorId = "user456",
-            Tags = new[] { "new", "test" }
+            Tags = ["new", "test"]
         };
 
         mockGrain.Setup(g => g.CreatePost(It.IsAny<OrleansBlog.Abstractions.Models.Post>()))

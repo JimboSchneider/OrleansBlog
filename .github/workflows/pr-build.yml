@@ -16,7 +16,7 @@ jobs:
       with:
         dotnet-version: '9.0.x'
     - name: Cache NuGet packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ runner.os == 'Windows' && 'C:\\Users\\runneradmin\\.nuget\\packages' || '~/.nuget/packages' }}
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.config', 'global.json') }}
@@ -32,21 +32,111 @@ jobs:
     - name: Ensure browsers are installed
       shell: pwsh
       run: |
-        cd ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
-        ./playwright.ps1 install --with-deps || echo "Playwright installation failed"
+        $testPath = Join-Path "." "OrleansBlog.E2E.Tests" "bin" "Debug" "net9.0"
+        cd $testPath
+        & "./playwright.ps1" install --with-deps
+        if ($LASTEXITCODE -ne 0) { Write-Host "Playwright installation failed" }
     - name: Start Orleans Silo
       run: |
-        dotnet run --project ./OrleansBlog.Silo/OrleansBlog.Silo.csproj --applicationName=Silo --gatewayPort=30000 &
-      shell: bash
+        if ($IsWindows) {
+          Start-Process -FilePath "dotnet" -ArgumentList "run", "--project", "./OrleansBlog.Silo/OrleansBlog.Silo.csproj", "--applicationName=Silo", "--gatewayPort=30000" -PassThru | Out-Null
+        }
+        else {
+          nohup dotnet run --project ./OrleansBlog.Silo/OrleansBlog.Silo.csproj --applicationName=Silo --gatewayPort=30000 > silo.log 2>&1 &
+          echo $! > silo.pid
+        }
+      shell: pwsh
     - name: Start Blazor Server
       run: |
-        dotnet run --project ./OrleansBlog/OrleansBlog.csproj &
-      shell: bash
-    - name: Wait for services to start
+        if ($IsWindows) {
+          Start-Process -FilePath "dotnet" -ArgumentList "run", "--project", "./OrleansBlog/OrleansBlog.csproj" -PassThru | Out-Null
+        }
+        else {
+          nohup dotnet run --project ./OrleansBlog/OrleansBlog.csproj > blazor.log 2>&1 &
+          echo $! > blazor.pid
+        }
+      shell: pwsh
+    - name: Wait for services and health check
       run: |
-        echo "Waiting for services to start..."
-        sleep 60 # Increased from 30 to 60 seconds
-      shell: bash
+        $timeout = 120
+        $elapsed = 0
+        $siloReady = $false
+        $blazorReady = $false
+        
+        Write-Host "Waiting for services to start..."
+        
+        while ($elapsed -lt $timeout -and (-not $siloReady -or -not $blazorReady)) {
+          Start-Sleep -Seconds 5
+          $elapsed += 5
+          
+          # Check if Silo is ready (port 30000)
+          if (-not $siloReady) {
+            try {
+              $null = Test-NetConnection -ComputerName localhost -Port 30000 -InformationLevel Quiet -WarningAction SilentlyContinue
+              $siloReady = $true
+              Write-Host "Orleans Silo is ready"
+            } catch {
+              Write-Host "Waiting for Orleans Silo... ($elapsed/$timeout seconds)"
+            }
+          }
+          
+          # Check if Blazor is ready (assuming port 5000 or 5001)
+          if (-not $blazorReady) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:5261" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+              if ($response.StatusCode -eq 200) {
+                $blazorReady = $true
+                Write-Host "Blazor Server is ready"
+              }
+            } catch {
+              # Try HTTPS
+              try {
+                $response = Invoke-WebRequest -Uri "https://localhost:7233" -UseBasicParsing -TimeoutSec 2 -SkipCertificateCheck -ErrorAction SilentlyContinue
+                if ($response.StatusCode -eq 200) {
+                  $blazorReady = $true
+                  Write-Host "Blazor Server is ready (HTTPS)"
+                }
+              } catch {
+                Write-Host "Waiting for Blazor Server... ($elapsed/$timeout seconds)"
+              }
+            }
+          }
+        }
+        
+        if (-not $siloReady -or -not $blazorReady) {
+          Write-Error "Services failed to start within $timeout seconds"
+          exit 1
+        }
+        
+        Write-Host "All services are ready!"
+      shell: pwsh
     - name: Run E2E tests
       run: dotnet test ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --configuration Release --verbosity normal
+    - name: Stop services
+      if: always()
+      run: |
+        if ($IsWindows) {
+          Get-Process -Name "dotnet" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*OrleansBlog.Silo*" -or $_.CommandLine -like "*OrleansBlog.csproj*" } | Stop-Process -Force
+        }
+        else {
+          if (Test-Path "silo.pid") {
+            $pid = Get-Content "silo.pid"
+            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+            Remove-Item "silo.pid"
+          }
+          if (Test-Path "blazor.pid") {
+            $pid = Get-Content "blazor.pid"
+            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+            Remove-Item "blazor.pid"
+          }
+        }
+      shell: pwsh
+    - name: Upload logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: service-logs-${{ matrix.os }}
+        path: |
+          silo.log
+          blazor.log
       

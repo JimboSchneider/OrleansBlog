@@ -58,7 +58,7 @@ jobs:
       shell: pwsh
     - name: Wait for services and health check
       run: |
-        $timeout = 120
+        $timeout = 300
         $elapsed = 0
         $siloReady = $false
         $blazorReady = $false
@@ -120,13 +120,13 @@ jobs:
         }
         else {
           if (Test-Path "silo.pid") {
-            $pid = Get-Content "silo.pid"
-            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+            $siloPid = Get-Content "silo.pid"
+            Stop-Process -Id $siloPid -Force -ErrorAction SilentlyContinue
             Remove-Item "silo.pid"
           }
           if (Test-Path "blazor.pid") {
-            $pid = Get-Content "blazor.pid"
-            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+            $blazorPid = Get-Content "blazor.pid"
+            Stop-Process -Id $blazorPid -Force -ErrorAction SilentlyContinue
             Remove-Item "blazor.pid"
           }
         }

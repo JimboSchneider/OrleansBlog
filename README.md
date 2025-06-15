@@ -116,8 +116,10 @@ The project includes automated build validation for pull requests targeting the 
 
 - **Multi-OS Testing**: Runs on both Ubuntu and Windows to ensure cross-platform compatibility
 - **Full Build Process**: Builds all projects in Release configuration
-- **E2E Test Automation**: Automatically starts Orleans Silo and Blazor Server, then runs Playwright tests
+- **E2E Test Automation**: Infrastructure ready to automatically start Orleans Silo and Blazor Server (currently disabled pending test stability improvements)
 - **NuGet Package Caching**: Speeds up builds by caching dependencies
+- **Enhanced Service Management**: Improved process startup reliability with proper error handling and logging
+- **Cross-Platform Compatibility**: Uses PowerShell Core for consistent behavior across Windows and Linux
 
 ### Running E2E Tests Locally
 E2E tests use Playwright for browser automation and require both the Orleans Silo and Blazor app to be running:
@@ -163,6 +165,7 @@ dotnet test OrleansBlog.E2E.Tests
 - Orleans grains currently use in-memory storage (persistence planned)
 - Localhost clustering only (not production-ready)
 - Limited post formatting options
+- E2E tests temporarily disabled in CI/CD pipeline pending stability improvements
 
 ## Contributing
 This is a learning project for exploring Orleans Framework. Contributions and suggestions are welcome!

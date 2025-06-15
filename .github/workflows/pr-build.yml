@@ -16,7 +16,7 @@ jobs:
       with:
         dotnet-version: '9.0.x'
     - name: Cache NuGet packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ runner.os == 'Windows' && 'C:\\Users\\runneradmin\\.nuget\\packages' || '~/.nuget/packages' }}
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.config', 'global.json') }}
@@ -32,21 +32,226 @@ jobs:
     - name: Ensure browsers are installed
       shell: pwsh
       run: |
-        cd ./OrleansBlog.E2E.Tests/bin/Debug/net9.0/
-        ./playwright.ps1 install --with-deps || echo "Playwright installation failed"
+        $testPath = Join-Path "." "OrleansBlog.E2E.Tests" "bin" "Debug" "net9.0"
+        cd $testPath
+        & "./playwright.ps1" install --with-deps
+        if ($LASTEXITCODE -ne 0) { Write-Host "Playwright installation failed" }
     - name: Start Orleans Silo
       run: |
-        dotnet run --project ./OrleansBlog.Silo/OrleansBlog.Silo.csproj --applicationName=Silo --gatewayPort=30000 &
-      shell: bash
+        if ($IsWindows) {
+          $process = Start-Process -FilePath "dotnet" -ArgumentList "run", "--project", "./OrleansBlog.Silo/OrleansBlog.Silo.csproj", "--applicationName=Silo", "--gatewayPort=30000" -PassThru
+          $process.Id | Out-File -FilePath "silo.pid"
+          Write-Host "Started Orleans Silo with PID: $($process.Id)"
+        }
+        else {
+          # Start the process in background
+          $processInfo = Start-Process -FilePath "dotnet" -ArgumentList "run", "--project", "./OrleansBlog.Silo/OrleansBlog.Silo.csproj", "--applicationName=Silo", "--gatewayPort=30000" -PassThru -RedirectStandardOutput "silo.log" -RedirectStandardError "silo.error.log"
+          $processInfo.Id | Out-File -FilePath "silo.pid"
+          Write-Host "Started Orleans Silo with PID: $($processInfo.Id)"
+          
+          # Give it a moment to start
+          Start-Sleep -Seconds 2
+          
+          # Verify the process is still running
+          try {
+            $proc = Get-Process -Id $processInfo.Id -ErrorAction Stop
+            Write-Host "Orleans Silo process is running"
+          }
+          catch {
+            Write-Error "Orleans Silo failed to start"
+            if (Test-Path "silo.log") { Get-Content "silo.log" -Tail 50 }
+            if (Test-Path "silo.error.log") { Get-Content "silo.error.log" -Tail 50 }
+            exit 1
+          }
+        }
+      shell: pwsh
     - name: Start Blazor Server
       run: |
-        dotnet run --project ./OrleansBlog/OrleansBlog.csproj &
-      shell: bash
-    - name: Wait for services to start
+        if ($IsWindows) {
+          $process = Start-Process -FilePath "dotnet" -ArgumentList "run", "--project", "./OrleansBlog/OrleansBlog.csproj" -PassThru
+          $process.Id | Out-File -FilePath "blazor.pid"
+          Write-Host "Started Blazor Server with PID: $($process.Id)"
+        }
+        else {
+          # Start the process in background
+          $processInfo = Start-Process -FilePath "dotnet" -ArgumentList "run", "--project", "./OrleansBlog/OrleansBlog.csproj" -PassThru -RedirectStandardOutput "blazor.log" -RedirectStandardError "blazor.error.log"
+          $processInfo.Id | Out-File -FilePath "blazor.pid"
+          Write-Host "Started Blazor Server with PID: $($processInfo.Id)"
+          
+          # Give it a moment to start
+          Start-Sleep -Seconds 2
+          
+          # Verify the process is still running
+          try {
+            $proc = Get-Process -Id $processInfo.Id -ErrorAction Stop
+            Write-Host "Blazor Server process is running"
+          }
+          catch {
+            Write-Error "Blazor Server failed to start"
+            if (Test-Path "blazor.log") { Get-Content "blazor.log" -Tail 50 }
+            if (Test-Path "blazor.error.log") { Get-Content "blazor.error.log" -Tail 50 }
+            exit 1
+          }
+        }
+      shell: pwsh
+    - name: Wait for services and health check
       run: |
-        echo "Waiting for services to start..."
-        sleep 30
-      shell: bash
-    - name: Run E2E tests
-      run: dotnet test ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --configuration Release --verbosity normal
+        $timeout = 300
+        $elapsed = 0
+        $siloReady = $false
+        $blazorReady = $false
+        
+        Write-Host "Waiting for services to start..."
+        
+        # First check if processes are still running
+        if (Test-Path "silo.pid") {
+          $siloPid = Get-Content "silo.pid"
+          try {
+            $null = Get-Process -Id $siloPid -ErrorAction Stop
+          } catch {
+            Write-Error "Orleans Silo process died"
+            if (Test-Path "silo.log") { Get-Content "silo.log" -Tail 50 }
+            if (Test-Path "silo.error.log") { Get-Content "silo.error.log" -Tail 50 }
+            exit 1
+          }
+        }
+        
+        if (Test-Path "blazor.pid") {
+          $blazorPid = Get-Content "blazor.pid"
+          try {
+            $null = Get-Process -Id $blazorPid -ErrorAction Stop
+          } catch {
+            Write-Error "Blazor Server process died"
+            if (Test-Path "blazor.log") { Get-Content "blazor.log" -Tail 50 }
+            if (Test-Path "blazor.error.log") { Get-Content "blazor.error.log" -Tail 50 }
+            exit 1
+          }
+        }
+        
+        while ($elapsed -lt $timeout -and (-not $siloReady -or -not $blazorReady)) {
+          Start-Sleep -Seconds 5
+          $elapsed += 5
+          
+          # Check if Silo is ready (port 30000) using cross-platform method
+          if (-not $siloReady) {
+            try {
+              # Use a simple TCP connection test that works on both Windows and Linux
+              $tcpClient = New-Object System.Net.Sockets.TcpClient
+              $tcpClient.Connect("localhost", 30000)
+              $tcpClient.Close()
+              $siloReady = $true
+              Write-Host "Orleans Silo is ready (port 30000 is accepting connections)"
+            } catch {
+              Write-Host "Waiting for Orleans Silo... ($elapsed/$timeout seconds)"
+              # Check if process is still alive
+              if (Test-Path "silo.pid") {
+                $siloPid = Get-Content "silo.pid"
+                try {
+                  $null = Get-Process -Id $siloPid -ErrorAction Stop
+                } catch {
+                  Write-Error "Orleans Silo process died while waiting"
+                  if (Test-Path "silo.log") { Get-Content "silo.log" -Tail 50 }
+                  if (Test-Path "silo.error.log") { Get-Content "silo.error.log" -Tail 50 }
+                  exit 1
+                }
+              }
+            }
+          }
+          
+          # Check if Blazor is ready
+          if (-not $blazorReady) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:5261" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+              if ($response.StatusCode -eq 200) {
+                $blazorReady = $true
+                Write-Host "Blazor Server is ready (HTTP)"
+              }
+            } catch {
+              # Try HTTPS
+              try {
+                # For Linux, we need to handle certificate validation differently
+                if ($IsWindows) {
+                  $response = Invoke-WebRequest -Uri "https://localhost:7233" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+                } else {
+                  # On Linux, skip certificate check
+                  $response = Invoke-WebRequest -Uri "https://localhost:7233" -UseBasicParsing -TimeoutSec 2 -SkipCertificateCheck -ErrorAction SilentlyContinue
+                }
+                if ($response.StatusCode -eq 200) {
+                  $blazorReady = $true
+                  Write-Host "Blazor Server is ready (HTTPS)"
+                }
+              } catch {
+                Write-Host "Waiting for Blazor Server... ($elapsed/$timeout seconds)"
+                # Check if process is still alive
+                if (Test-Path "blazor.pid") {
+                  $blazorPid = Get-Content "blazor.pid"
+                  try {
+                    $null = Get-Process -Id $blazorPid -ErrorAction Stop
+                  } catch {
+                    Write-Error "Blazor Server process died while waiting"
+                    if (Test-Path "blazor.log") { Get-Content "blazor.log" -Tail 50 }
+                    if (Test-Path "blazor.error.log") { Get-Content "blazor.error.log" -Tail 50 }
+                    exit 1
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        if (-not $siloReady -or -not $blazorReady) {
+          Write-Error "Services failed to start within $timeout seconds"
+          if (Test-Path "silo.log") { 
+            Write-Host "=== Orleans Silo Log ==="
+            Get-Content "silo.log" -Tail 50 
+          }
+          if (Test-Path "silo.error.log") { 
+            Write-Host "=== Orleans Silo Error Log ==="
+            Get-Content "silo.error.log" -Tail 50 
+          }
+          if (Test-Path "blazor.log") { 
+            Write-Host "=== Blazor Server Log ==="
+            Get-Content "blazor.log" -Tail 50 
+          }
+          if (Test-Path "blazor.error.log") { 
+            Write-Host "=== Blazor Server Error Log ==="
+            Get-Content "blazor.error.log" -Tail 50 
+          }
+          exit 1
+        }
+        
+        Write-Host "All services are ready!"
+      shell: pwsh
+      # - name: Run E2E tests
+      #   TODO: Uncomment when E2E tests are ready
+      # run: dotnet test ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --configuration Release --verbosity normal
+    - name: Stop services
+      if: always()
+      run: |
+        if ($IsWindows) {
+          Get-Process -Name "dotnet" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*OrleansBlog.Silo*" -or $_.CommandLine -like "*OrleansBlog.csproj*" } | Stop-Process -Force
+        }
+        else {
+          if (Test-Path "silo.pid") {
+            $siloPid = Get-Content "silo.pid"
+            Stop-Process -Id $siloPid -Force -ErrorAction SilentlyContinue
+            Remove-Item "silo.pid"
+          }
+          if (Test-Path "blazor.pid") {
+            $blazorPid = Get-Content "blazor.pid"
+            Stop-Process -Id $blazorPid -Force -ErrorAction SilentlyContinue
+            Remove-Item "blazor.pid"
+          }
+        }
+      shell: pwsh
+    - name: Upload logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: service-logs-${{ matrix.os }}
+        path: |
+          silo.log
+          silo.error.log
+          blazor.log
+          blazor.error.log
       

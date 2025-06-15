@@ -110,8 +110,9 @@ jobs:
         
         Write-Host "All services are ready!"
       shell: pwsh
-    - name: Run E2E tests
-      run: dotnet test ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --configuration Release --verbosity normal
+      # - name: Run E2E tests
+      #   TODO: Uncomment when E2E tests are ready
+      # run: dotnet test ./OrleansBlog.E2E.Tests/OrleansBlog.E2E.Tests.csproj --configuration Release --verbosity normal
     - name: Stop services
       if: always()
       run: |

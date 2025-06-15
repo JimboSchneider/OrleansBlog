@@ -120,6 +120,7 @@ The project includes automated build validation for pull requests targeting the 
 - **NuGet Package Caching**: Speeds up builds by caching dependencies
 - **Enhanced Service Management**: Improved process startup reliability with proper error handling and logging
 - **Cross-Platform Compatibility**: Uses PowerShell Core for consistent behavior across Windows and Linux
+- **Smart Build Triggering**: Documentation-only changes (*.md files, LICENSE, etc.) do not trigger builds to save CI/CD resources
 
 ### Running E2E Tests Locally
 E2E tests use Playwright for browser automation and require both the Orleans Silo and Blazor app to be running:
